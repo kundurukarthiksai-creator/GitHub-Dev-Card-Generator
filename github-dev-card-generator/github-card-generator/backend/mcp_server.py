@@ -8,9 +8,15 @@ from collections import Counter
 
 load_dotenv()
 
-client = genai.Client(api_key=os.getenv("GOOGLE_API_KEY"))
-
 STATIC_DIR = os.path.join(os.path.dirname(__file__), "static", "cards")
+
+
+def get_genai_client():
+    """Create the Gemini client only when a key is configured."""
+    api_key = os.getenv("GOOGLE_API_KEY")
+    if not api_key:
+        return None
+    return genai.Client(api_key=api_key)
 
 
 async def scrape_github(username: str) -> Dict:
@@ -83,6 +89,10 @@ The JSON must have exactly these keys:
 Return strictly valid JSON only, no markdown.
 """
     try:
+        client = get_genai_client()
+        if client is None:
+            raise RuntimeError("GOOGLE_API_KEY is not configured")
+
         response = client.models.generate_content(
             model="gemini-2.0-flash",
             contents=prompt,

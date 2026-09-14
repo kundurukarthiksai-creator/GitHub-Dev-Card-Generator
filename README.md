@@ -1,128 +1,101 @@
 # GitHub Dev Card Generator
 
-Generate beautiful, AI-powered developer identity cards from any public GitHub profile.
+Generate shareable developer identity cards from any public GitHub profile.
 
-![GitHub Dev Card Generator](./Screenshot%202026-05-17%20092339.png)
+The app fetches GitHub profile/repository data, summarizes the developer profile, and renders a styled card that can be previewed in the browser. Gemini can be used for richer AI summaries when a key is configured; otherwise the backend falls back to deterministic profile text so the app can still run locally.
 
-## 🔗 Live Demo
+![GitHub Dev Card preview](./Screenshot%202026-05-17%20092339.png)
 
-🌐 **Deploy Link:**  
-https://github-card-frontend-4633861684.us-central1.run.app/
+## What It Does
 
-💻 **GitHub Repository:**  
-https://github.com/kundurukarthik15-gif/github-dev-card-generator
-
----
-
-## What it does
-
-Enter a GitHub username → the app fetches the profile via the GitHub API, sends it to **Gemini 2.0 Flash** for analysis, and renders a styled dev card with:
-
-- Avatar, name, bio, and location
-- AI-generated developer vibe & fun fact
-- Top skills and most-used languages
-- Top 3 starred repositories
-- Stats: repos, followers, languages
-
-Cards can be downloaded as **PNG**, exported as **PDF**, or shared via a **QR code**.
-
----
-
-## Themes
-
-| Theme | Preview |
-|-------|---------|
-| 🌑 Dark | GitHub-inspired dark |
-| ☀️ Light | Clean light mode |
-| ⚡ Neon | Cyberpunk green glow |
-
----
-
-## 🖼️ Screenshots
-
-| | | |
-|---|---|---|
-| ![](./Screenshot%202026-05-17%20092339.png) | ![](./Screenshot%202026-05-17%20092339\(1\).png) | ![](./Screenshot%202026-05-17%20092424.png) |
-
-| |
-|---|
-| ![](./Screenshot%202026-05-17%20092501.png) |
-
----
+- Fetches public GitHub profile and repository data.
+- Builds a developer card with avatar, bio, location, repository stats, top repositories, and common languages.
+- Supports dark, light, and neon-style card themes.
+- Uses Gemini for AI-generated profile analysis when `GOOGLE_API_KEY` is configured.
+- Falls back to a deterministic summary when no Gemini key is available.
+- Serves a static frontend and a FastAPI backend.
 
 ## Tech Stack
 
-| Layer | Tech |
-|-------|------|
-| Frontend | Vanilla HTML/CSS/JS |
-| Backend | FastAPI (Python) |
-| AI | Google Gemini 2.0 Flash |
-| Data | GitHub REST API |
-| Export | html2canvas, jsPDF |
-| Infra | Docker + Docker Compose |
+- Frontend: HTML, CSS, JavaScript
+- Backend: Python, FastAPI
+- AI: Google Gemini API, optional
+- Data: GitHub REST API
+- Deployment: Docker / Docker Compose
 
----
+## Project Layout
 
-## Getting Started
-
-### Prerequisites
-
-- Docker & Docker Compose
-- A Google Gemini API key
-- (Optional) A GitHub personal access token for higher rate limits
-
-### Setup
-
-1. Clone the repo:
-   ```bash
-   git clone https://github.com/kundurukarthik15-gif/github-dev-card-generator.git
-   cd github-dev-card-generator/github-card-generator
-   ```
-
-2. Create your `.env` file:
-   ```bash
-   cp .env.example .env
-   ```
-
-3. Fill in your credentials in `.env`:
-   ```env
-   GOOGLE_API_KEY=<your_gemini_api_key>
-   GITHUB_TOKEN=<your_github_token>   # optional
-   ```
-
-4. Start the app:
-   ```bash
-   docker-compose up --build
-   ```
-
-5. Open:
-   ```txt
-   http://localhost:8080
-   ```
-
----
-
-## Running without Docker
-
-```bash
-cd backend
-pip install -r requirements.txt
-uvicorn main:app --host 0.0.0.0 --port 8080
+```text
+github-dev-card-generator/
+  github-card-generator/
+    backend/
+      main.py
+      agent.py
+      mcp_server.py
+      requirements.txt
+      .env.example
+    frontend/
+      index.html
+      assets/
+    scripts/
+      smoke-test.py
+    docker-compose.yml
 ```
 
-Then open `frontend/index.html` directly in your browser.
+## Local Setup
 
----
+From the repository root:
 
-## API Reference
+```powershell
+cd github-dev-card-generator\github-card-generator
+python -m venv .venv
+.\.venv\Scripts\python -m pip install -r backend\requirements.txt
+Copy-Item backend\.env.example backend\.env
+```
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
+Optional environment variables in `backend\.env`:
+
+```env
+GOOGLE_API_KEY=
+GITHUB_TOKEN=
+```
+
+`GOOGLE_API_KEY` enables Gemini-powered profile summaries. `GITHUB_TOKEN` is optional and only helps with GitHub API rate limits.
+
+## Run
+
+```powershell
+.\.venv\Scripts\python -m uvicorn backend.main:app --host 0.0.0.0 --port 8080
+```
+
+Open:
+
+```text
+http://localhost:8080
+```
+
+## Smoke Test
+
+```powershell
+.\.venv\Scripts\python scripts\smoke-test.py
+```
+
+The smoke test checks:
+
+- the FastAPI health function;
+- backend import without `GOOGLE_API_KEY`;
+- deterministic fallback profile analysis;
+- card HTML generation.
+
+## API
+
+| Method | Endpoint | Purpose |
+|---|---|---|
 | `GET` | `/health` | Health check |
-| `POST` | `/generate` | Generate a dev card |
+| `POST` | `/generate` | Generate a developer card |
 | `GET` | `/card/{username}` | Retrieve a saved card |
 
-### POST `/generate`
+Example request:
 
 ```json
 {
@@ -131,35 +104,24 @@ Then open `frontend/index.html` directly in your browser.
 }
 ```
 
-Response includes `card_url`, `vibe`, and `theme`.
+## Screenshots
 
----
+| Dark | Light | Neon |
+|---|---|---|
+| ![](./Screenshot%202026-05-17%20092339.png) | ![](./Screenshot%202026-05-17%20092424.png) | ![](./Screenshot%202026-05-17%20092501.png) |
 
-## Project Structure
+## Known Limitations
 
-```bash
-github-card-generator/
-├── backend/
-│   ├── main.py
-│   ├── agent.py
-│   ├── mcp_server.py
-│   ├── requirements.txt
-│   └── Dockerfile
-├── frontend/
-│   ├── index.html
-│   └── Dockerfile
-└── docker-compose.yml
-```
+- Generated card HTML is local runtime output and is intentionally ignored by Git.
+- Gemini output depends on external API availability and configured credentials.
+- GitHub API calls may hit unauthenticated rate limits unless `GITHUB_TOKEN` is configured.
+- The current frontend is static and intentionally lightweight.
 
----
+## Status
 
-## 🚀 Future Improvements
+This is a portfolio project cleanup pass. The backend now starts without a Gemini key and has a local smoke test for the core fallback path.
 
-- Multiple card layouts
-- Animated themes
-- Social media integration
-- AI-generated portfolio summaries
-- Public shareable profile pages
+## License
 
----
+MIT
 
