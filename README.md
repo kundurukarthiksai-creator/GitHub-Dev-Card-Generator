@@ -1,5 +1,7 @@
 # GitHub Dev Card Generator
 
+[![CI](https://github.com/kundurukarthiksai-creator/GitHub-Dev-Card-Generator/actions/workflows/ci.yml/badge.svg)](https://github.com/kundurukarthiksai-creator/GitHub-Dev-Card-Generator/actions/workflows/ci.yml)
+
 Generate shareable developer identity cards from any public GitHub profile.
 
 The app fetches GitHub profile/repository data, summarizes the developer profile, and renders a styled card that can be previewed in the browser. Gemini can be used for richer AI summaries when a key is configured; otherwise the backend falls back to deterministic profile text so the app can still run locally.
@@ -124,4 +126,3 @@ This is a portfolio project cleanup pass. The backend now starts without a Gemin
 ## License
 
 MIT
-
